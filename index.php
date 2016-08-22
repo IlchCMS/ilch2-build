@@ -1,5 +1,22 @@
 <?php
-$travisToken = include_once __DIR__ . '/token.php';
+$config = include_once __DIR__ . '/config.php';
+
+if (!isset($config['token'])) {
+        header('HTTP/1.1 500 Application Error');
+        exit;      
+}
+
+function logRequest(array $headers)
+{
+        global $config;
+        if (!isset($config['logDir']) || !is_dir($config['logDir']) || !is_writable($config['logDir'])) {
+                return;
+        }
+        file_put_contents(
+                $config['logDir'] . '/' . date('Ymd-His') . '.log',
+                sprintf("Headers: %s\nPayload: %s", print_r($headers, true), $_POST['payload'])
+        );
+}
 
 if('POST' === $_SERVER['REQUEST_METHOD']) {
         if (!isset($_POST['payload'])) {
@@ -16,13 +33,15 @@ if('POST' === $_SERVER['REQUEST_METHOD']) {
 
         $headers = apache_request_headers();
 
+        logRequest($headers);
+
         if (!isset($headers['Authorization'])) {
                 header('HTTP/1.1 401 Unauthorized');
                 exit;
         }
 
         $repoSlug = $payload['repository']['owner_name'] . '/' . $payload['repository']['name'];
-        $authorization = hash('sha256', $repoSlug.$travisToken);
+        $authorization = hash('sha256', $repoSlug . $config['token']);
 
         if ($headers['Authorization'] !== $authorization) {
                 header('HTTP/1.1 401 Unauthorized');
