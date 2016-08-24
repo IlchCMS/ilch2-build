@@ -48,7 +48,7 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
         exit;
     }
 
-    $possibleTokens = [];
+    $possibleTokens = array();
 
     if (!empty($config['fullToken'])) {
         $possibleTokens[] = $config['fullToken'];
