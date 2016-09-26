@@ -5,4 +5,6 @@ return array(
     'logDir' => __DIR__ . '/logs',
     'phpBin' => 'php',
     'composer' => '/path/to/composer',
+    //optional
+    //'composerHome' => '/path/to/writable/dir'
 );

@@ -33,7 +33,11 @@ function createArchive($branch)
     curl_close($ch);
     fclose($fp);
 
-    $composerInstall = $config['phpBin'] . ' ' . $config['composer'] . ' install --no-dev --optimize-autoloader';
+    $composer = $config['phpBin'] . ' ' . $config['composer'];
+    if (!empty($config['composerHome'])) {
+        $composer = 'COMPOSER_HOME=' . escapeshellarg($config['composerHome']) . ' ' . $composer;
+    }
+    $composerInstall = $composer . ' install --no-dev --optimize-autoloader --no-interaction';
 
     shell_exec('unzip ' . $archive);
     unlink($archive);
