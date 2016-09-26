@@ -1,0 +1,8 @@
+<?php
+return array(
+    'token' => 'travis token',
+    'fullToken' => 'complete travis token',
+    'logDir' => __DIR__ . '/logs',
+    'phpBin' => 'php',
+    'composer' => '/path/to/composer',
+);

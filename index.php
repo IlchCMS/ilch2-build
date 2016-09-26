@@ -1,23 +1,6 @@
 <?php
+require __DIR__ . '/functions.php';
 $config = include_once __DIR__ . '/config.php';
-
-function logRequest($errorLine = null, $message = null)
-{
-    global $config;
-    if (!isset($config['logDir']) || !is_dir($config['logDir']) || !is_writable($config['logDir'])) {
-        return;
-    }
-    $logFile = $config['logDir'] . '/' . date('Ymd-His') . '.log';
-    $fh = fopen($logFile, 'w');
-    if (!empty($errorLine)) {
-        fwrite($fh, sprintf("Error in file %s line %d\n", __FILE__, $errorLine));
-    }
-    if (!empty($message)) {
-        fwrite($fh, sprintf("ErrorMessage: %s\n", $message));
-    }
-    fwrite($fh, sprintf("Headers: %s\nPayload: %s\n", print_r(apache_request_headers(), true), $_POST['payload']));
-    fclose($fh);
-}
 
 if (!isset($config['token']) || !isset($config['fullToken'])) {
     header('HTTP/1.1 500 Application Error');
@@ -69,21 +52,7 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
     }
 
     if ($payload['branch'] === 'master' && $payload['type'] === 'push') {
-        $fp = fopen('master_tmp.zip', 'w+');
-        $ch = curl_init('https://codeload.github.com/IlchCMS/Ilch-2.0/zip/master');
-        curl_setopt($ch, CURLOPT_TIMEOUT, 50);
-        curl_setopt($ch, CURLOPT_FILE, $fp);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_ENCODING, '');
-        curl_exec($ch);
-        curl_close($ch);
-        fclose($fp);
-
-        shell_exec('unzip master_tmp.zip');
-        unlink('master_tmp.zip');
-        shell_exec('cd Ilch-2.0-master; rm -R tests; zip -r ../master_tmp.zip .; cd ..');
-        rename('master_tmp.zip', 'master.zip');
-        shell_exec('rm -R Ilch-2.0-master;');
+        createArchive($payload['branch']);
     } else {
         logRequest(__LINE__, 'no master push');
     }
