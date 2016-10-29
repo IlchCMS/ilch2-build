@@ -39,6 +39,10 @@ function createArchive($branch)
     }
     $composerInstall = $composer . ' install --no-dev --optimize-autoloader --no-interaction';
 
+    //run optimize vendor script
+    $composerInstall .= ';if [ -f build/optimize_vendor.php ]; then '
+        . $config['phpBin'] . ' build/optimize_vendor.php; fi';
+
     shell_exec('unzip ' . $archive);
     unlink($archive);
     shell_exec('cd Ilch-2.0-' . $branch . '; ' . $composerInstall . '; zip -r ../' . $archive . ' .; cd ..');
