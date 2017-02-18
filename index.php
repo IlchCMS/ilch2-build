@@ -2,12 +2,6 @@
 require __DIR__ . '/functions.php';
 $config = include_once __DIR__ . '/config.php';
 
-if (!isset($config['token']) || !isset($config['fullToken'])) {
-    header('HTTP/1.1 500 Application Error');
-    logRequest(__LINE__, 'Token is missing in config');
-    exit;
-}
-
 if ('POST' === $_SERVER['REQUEST_METHOD']) {
     if (!isset($_POST['payload'])) {
         header('HTTP/1.1 400 Bad Request');
@@ -51,10 +45,10 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
         exit;
     }
 
-    if ($payload['branch'] === 'master' && $payload['type'] === 'push') {
-        createArchive($payload['branch']);
+    if (in_array($payload['branch'], $config['allowedBranches']) && $payload['type'] === 'push') {
+        createArchive($payload['branch'], $payload['commit']);
     } else {
-        logRequest(__LINE__, 'no master push');
+        logRequest(__LINE__, 'no push of a allowed branch (' . implode(', ', $config['allowedBranches']) . ')');
     }
 } else {
     header('HTTP/1.1 405 Method Not Allowed');

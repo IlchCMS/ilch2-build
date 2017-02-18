@@ -1,10 +1,13 @@
 <?php
 return array(
-    'token' => 'travis token',
-    'fullToken' => 'complete travis token',
+    // required options
     'logDir' => __DIR__ . '/logs',
     'phpBin' => 'php',
     'composer' => '/path/to/composer',
-    //optional
+    //allowed branches, if you want to use another name for the created zip, use a key
+    'allowedBranches' => array('master', 'archiveName' => 'stupidBranchName'),
+
+    // optional options
     //'composerHome' => '/path/to/writable/dir'
+    //'cmd' => '"c:\Program Files\Git\bin\bash.exe" -c "%s"' //can be set to run the script under windows with git installed (for testing - zip tool has to be added)
 );
