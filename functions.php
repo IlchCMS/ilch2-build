@@ -51,7 +51,8 @@ function createArchive($branch, $commit)
         'cd Ilch-2.0-' . $commit,
         $composer . ' install --no-dev --optimize-autoloader --no-interaction',
         'if [ -f build/optimize_vendor.php ]; then ' . $config['phpBin'] . ' build/optimize_vendor.php; fi',
-        'zip -r ../' . $archiveName . '.zip .',
+        'zip -r ../' . $archiveName . '_NEW_.zip .',
+        'mv ../' . $archiveName . '_NEW_.zip ../' . $archiveName . '.zip',
         'cd ..',
         'rm -r Ilch-2.0-' . $commit
     );
