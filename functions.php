@@ -18,13 +18,22 @@ function logRequest($errorLine = null, $message = null)
     fclose($fh);
 }
 
-function createArchive($branch, $commit)
+/**
+ * @param string $branch
+ * @param string $commit
+ * @param string|null $tag
+ */
+function createArchive($branch, $commit, $tag = null)
 {
     global $config;
 
-    $archiveName = array_search($branch, $config['allowedBranches']);
-    if (!is_string($archiveName)) {
-        $archiveName = $branch;
+    if (preg_match('~^v?\d+(?:\.\d+){0,2}$~',$tag) === 1) {
+        $archiveName = $tag;
+    } else {
+        $archiveName = array_search($branch, $config['allowedBranches']);
+        if (!is_string($archiveName)) {
+            $archiveName = $branch;
+        }
     }
 
     $archive = $commit . '_tmp.zip';
