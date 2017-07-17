@@ -45,7 +45,11 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
         exit;
     }
 
-    if (in_array($payload['branch'], $config['allowedBranches']) && $payload['type'] === 'push') {
+    if ($payload['type'] === 'push'
+        && (in_array($payload['branch'], $config['allowedBranches'])
+            || $payload['branch'] === $payload['tag']
+        )
+    ) {
         createArchive($payload['branch'], $payload['commit'], $payload['tag']);
     } else {
         logRequest(__LINE__, 'no push of a allowed branch (' . implode(', ', $config['allowedBranches']) . ')');
