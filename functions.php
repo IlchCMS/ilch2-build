@@ -1,6 +1,6 @@
 <?php
 
-function logRequest($errorLine = null, $message = null)
+function logReqummaest($message = null, $errorFile = null, $errorLine = null)
 {
     global $config;
     if (!isset($config['logDir']) || !is_dir($config['logDir']) || !is_writable($config['logDir'])) {
@@ -8,8 +8,8 @@ function logRequest($errorLine = null, $message = null)
     }
     $logFile = $config['logDir'] . '/' . date('Ymd-His') . '.log';
     $fh = fopen($logFile, 'w');
-    if (!empty($errorLine)) {
-        fwrite($fh, sprintf("Error in file %s line %d\n", __FILE__, $errorLine));
+    if (!empty($errorLine) && !empty($errorFile)) {
+        fwrite($fh, sprintf("Error in file %s line %d\n", $errorFile, $errorLine));
     }
     if (!empty($message)) {
         fwrite($fh, sprintf("ErrorMessage: %s\n", $message));
@@ -43,8 +43,11 @@ function createArchive($branch, $commit, $tag = null)
         curl_setopt($ch, CURLOPT_TIMEOUT, 50);
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         curl_setopt($ch, CURLOPT_ENCODING, '');
-        curl_exec($ch);
+        if (!curl_exec($ch)) {
+            logRequest('CURL download error: ' . curl_error($ch), __FILE__, __LINE__);
+        }
         curl_close($ch);
         fclose($fp);
     }

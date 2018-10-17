@@ -5,7 +5,7 @@ $config = include_once __DIR__ . '/config.php';
 if ('POST' === $_SERVER['REQUEST_METHOD']) {
     if (!isset($_POST['payload'])) {
         header('HTTP/1.1 400 Bad Request');
-        logRequest(__LINE__, 'no payload in request');
+        logRequest('no payload in request', __FILE__, __LINE__);
         exit;
     }
 
@@ -13,7 +13,7 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
 
     if (!isset($headers['Signature'])) {
         header('HTTP/1.1 401 Unauthorized');
-        logRequest(__LINE__, 'missing Signature header');
+        logRequest('missing Signature header', __FILE__, __LINE__);
         exit;
     }
 
@@ -28,7 +28,11 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
     );
     if (1 !== $verification) {
         header('HTTP/1.1 401 Unauthorized');
-        logRequest(__LINE__, $verification === 0 ? 'provided Signature is invalid' : 'error while Signature validation');
+        logRequest(
+            $verification === 0 ? 'provided Signature is invalid' : 'error while Signature validation',
+            __FILE__,
+            __LINE__
+        );
         exit;
     }
 
@@ -36,12 +40,12 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
 
     if (!isset($payload['repository']['owner_name']) || !isset($payload['repository']['name'])) {
         header('HTTP/1.1 400 Bad Request');
-        logRequest(__LINE__, 'missing owner or/and repository name');
+        logRequest('missing owner or/and repository name', __FILE__, __LINE__);
         exit;
     }
 
     if (!isset($headers['Travis-Repo-Slug']) || $headers['Travis-Repo-Slug'] !== 'IlchCMS/Ilch-2.0') {
-        logRequest(__LINE__, 'invalid repo slug');
+        logRequest('invalid repo slug', __FILE__, __LINE__);
         exit;
     }
 
@@ -52,7 +56,11 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
     ) {
         createArchive($payload['branch'], $payload['commit'], $payload['tag']);
     } else {
-        logRequest(__LINE__, 'no push of a allowed branch (' . implode(', ', $config['allowedBranches']) . ')');
+        logRequest(
+            'no push of a allowed branch (' . implode(', ', $config['allowedBranches']) . ')',
+            __FILE__,
+            __LINE__
+        );
     }
 } else {
     header('HTTP/1.1 405 Method Not Allowed');
