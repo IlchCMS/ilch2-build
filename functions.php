@@ -1,6 +1,6 @@
 <?php
 
-function logReqummaest($message = null, $errorFile = null, $errorLine = null)
+function logRequest($message = null, $errorFile = null, $errorLine = null)
 {
     global $config;
     if (!isset($config['logDir']) || !is_dir($config['logDir']) || !is_writable($config['logDir'])) {
@@ -37,20 +37,6 @@ function createArchive($branch, $commit, $tag = null)
     }
 
     $archive = $commit . '_tmp.zip';
-    if (!file_exists($archive)) {
-        $fp = fopen($archive, 'w+');
-        $ch = curl_init('https://codeload.github.com/IlchCMS/Ilch-2.0/zip/' . $commit);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 50);
-        curl_setopt($ch, CURLOPT_FILE, $fp);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-        curl_setopt($ch, CURLOPT_ENCODING, '');
-        if (!curl_exec($ch)) {
-            logRequest('CURL download error: ' . curl_error($ch), __FILE__, __LINE__);
-        }
-        curl_close($ch);
-        fclose($fp);
-    }
 
     $composer = $config['phpBin'] . ' ' . $config['composer'];
     if (!empty($config['composerHome'])) {
@@ -69,10 +55,35 @@ function createArchive($branch, $commit, $tag = null)
         'rm -r Ilch-2.0-' . $commit
     );
 
+    if (!file_exists($archive)) {
+        if (isset($config['useCurlExecutable']) && $config['useCurlExecutable']) {
+            array_unshift(
+                $commands,
+                sprintf('curl -sL https://codeload.github.com/IlchCMS/Ilch-2.0/zip/%s --output %s', $commit, $archive)
+            );
+        } else {
+            $fp = fopen($archive, 'w+');
+            $ch = curl_init('https://codeload.github.com/IlchCMS/Ilch-2.0/zip/' . $commit);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 50);
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+            curl_setopt($ch, CURLOPT_ENCODING, '');
+            if (!curl_exec($ch)) {
+                logRequest('CURL download error: ' . curl_error($ch), __FILE__, __LINE__);
+            }
+            curl_close($ch);
+            fclose($fp);
+        }
+    }
+
     $cmdLine = implode(' && ', $commands);
 
     if (isset($config['cmd'])) {
         $cmdLine = sprintf($config['cmd'], $cmdLine);
     }
-    shell_exec($cmdLine);
+    exec($cmdLine,$cmdOut,$cmdReturn);
+    if ($cmdReturn !== 0) {
+        logRequest('Error while creating archive: ' . implode("\n",$cmdOut),__FILE__, __LINE__);
+    }
 }

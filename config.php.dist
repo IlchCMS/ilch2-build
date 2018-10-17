@@ -10,4 +10,5 @@ return array(
     // optional options
     //'composerHome' => '/path/to/writable/dir'
     //'cmd' => '"c:\Program Files\Git\bin\bash.exe" -c "%s"' //can be set to run the script under windows with git installed (for testing - zip tool has to be added)
+    //'useCurlExecutable' => true // download file with curl as command instead of php implementation
 );
