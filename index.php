@@ -18,7 +18,7 @@ if ('POST' === $_SERVER['REQUEST_METHOD']) {
     }
 
     //load config from travis
-    $travisConfigJson = file_get_contents('https://api.travis-ci.org/config');
+    $travisConfigJson = file_get_contents('https://api.travis-ci.com/config');
     $travisConfig = json_decode($travisConfigJson, true);
 
     $verification = openssl_verify(
